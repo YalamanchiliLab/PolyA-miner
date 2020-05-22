@@ -1,4 +1,4 @@
-# PolyA-miner
+# PolyA-miner<img src = "img/PolyA-miner_logo.png" width="180"> 
 Accurate assessment of differential alternative poly-adenylation from 3'Seq data using vector projections and non-negative matrix factorization -Yalamanchili H.K. et al.
 
 ## Usage
