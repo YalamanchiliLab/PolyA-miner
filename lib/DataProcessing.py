@@ -4,7 +4,7 @@ import concurrent.futures as cf, os, glob, time
 def process_rawfastq(d, s, mc):
     if int(mc) > 16:
         mc = '16'
-    cmd = 'fastp -i ' + s + ' -a AGATCGGAAGAGC -f 6 -g -l 40 -h ' + d + '/' + d.split('/')[-1] + '_trim-report.html -w ' + mc + ' -Q -o ' + d + '/' + d.split('/')[-1] + '_trim.fastq'
+    cmd = 'fastp -i ' + s + ' -a AGATCGGAAGAGC -f 6 -g -l 40 -h ' + d + '/' + d.split('/')[-1] + '_trim-report.html -w ' + str(mc) + ' -Q -o ' + d + '/' + d.split('/')[-1] + '_trim.fastq'
     print(cmd)
     os.system(cmd)
     cmd = 'pigz -p ' + str(mc) + ' ' + d + '/' + d.split('/')[-1] + '_trim.fastq'

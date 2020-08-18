@@ -41,7 +41,9 @@ PolyA-miner.py: the following arguments are required: -d, -o, -pa, -index, -fast
   ```
   
 ## Dependency
-1) Data Processing: fastp, bowtie2, samtools    
+1) Data Processing: fastp, bowtie2, samtools, featureCounts/Subread    
 2) Python libraries: pandas, cython, pybedtools, scipy, sklearn, statsmodels    
 
 PolyA-miner will check for key requied packages and install them. If any of the installations fail, try installing python3.X-dev library ```sudo apt-get install python3.X-dev```  
+
+Test environment: fastp v0.20.0, bowtie2 v2.3.4.1, samtools v1.7, featureCounts v1.6.0

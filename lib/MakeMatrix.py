@@ -70,7 +70,7 @@ def APA_counts(f):
 	log = subprocess.run(['featureCounts','-a',saf,'-F','SAF','-f','-O','--readExtension5','0','--readExtension3','0','-M','-s','0','-T','5','-o',file.replace('.sorted.bam','')+'.APA.Counts.txt',file],stderr=subprocess.PIPE,stdout=subprocess.PIPE,shell=False)
 	output = log.stderr.decode(encoding='utf-8').split("\n")
 	for oline in output:
-		if "Total reads :" in oline:
+		if "Total reads :" in oline or "Total alignments :" in oline:
 			n=oline.strip().split(": ")[1].split(" ")[0]
 			return(n)
 
