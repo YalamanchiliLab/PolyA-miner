@@ -18,9 +18,11 @@ def ExtAnnotatedAPA(outDir, fkey, ref_polyA, APAblock, mddb, lf):
     df.to_csv(outDir + fkey + '.APSitesDB.bed', sep='\t', index=None, header=None)
     bed = BedTool(outDir + fkey + '.APSitesDB.bed')
     bed = bed.sort()
-    merged = bed.merge(s=True, c=[4, 5], o='distinct', d=mddb)
+    #merged = bed.merge(s=True, c=[4, 5], o='distinct', d=mddb) # Worked with bedtools 2.26 but failed with 2.29
+    merged = bed.merge(s=True, c=[4, 5, 6], o='distinct', d=mddb) # For bedtools 2.29
     merged.saveas(outDir + fkey + '.APSitesDB.bed')
-    df = pd.read_csv(outDir + fkey + '.APSitesDB.bed', sep='\t', index_col=None, header=None, names=['chr', 'start', 'end', 'strand', 'gene', 'PAtype'])
+    #df = pd.read_csv(outDir + fkey + '.APSitesDB.bed', sep='\t', index_col=None, header=None, names=['chr', 'start', 'end', 'strand', 'gene', 'PAtype']) # Worked with bedtools 2.26 but failed with 2.29
+    df = pd.read_csv(outDir + fkey + '.APSitesDB.bed', sep='\t', index_col=None, header=None, names=['chr', 'start', 'end', 'gene', 'PAtype', 'strand']) # For bedtools 2.29
     df = df[['chr', 'start', 'end', 'gene', 'PAtype', 'strand']]
     df = df[~df['chr'].str.contains('_')]
     df = df[~df['gene'].str.contains(',')]
