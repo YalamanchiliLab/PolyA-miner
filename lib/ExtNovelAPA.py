@@ -46,13 +46,14 @@ def mergeBG(f):
     fw.close()
     bed = BedTool(pars[0].replace('.bg', '.bed'))
     bed = bed.sort()
-    merged = bed.merge(s=True)
+    #merged = bed.merge(s=True) # Worked with bedtools 2.26 but failed with 2.29
+    merged = bed.merge(s=True,c=[6], o='distinct') # For bedtools 2.29
     merged.saveas(pars[0].replace('.bg', '.bed'))
 
 
 def add_gene_name(a, b):
     os.system('bedtools sort -i ' + a + ' > ' + a.replace('.bed', '.sorted.bed'))
-    cmd = 'bedtools closest -a ' + a.replace('.bed', '.sorted.bed') + ' -b ' + b + ' -s -id -D a -t first -k 1 > AltPA.temp.gene.bed'
+    cmd = 'bedtools closest -nonamecheck -a ' + a.replace('.bed', '.sorted.bed') + ' -b ' + b + ' -s -id -D a -t first -k 1 > AltPA.temp.gene.bed'
     os.system(cmd)
     tempdf = pd.read_csv('AltPA.temp.gene.bed', sep='\t', index_col=None, header=None)
     tempdf = tempdf.iloc[:, [0, 1, 2, 5, 9, 12]]
@@ -87,9 +88,11 @@ def ExtNovelAPA(outDir, fkey, ref_polyA, ref_bed, ref_fasta, APAblock, mddb, md,
     df.to_csv(outDir + fkey + '.APSitesDB.bed', sep='\t', index=None, header=None)
     bed = BedTool(outDir + fkey + '.APSitesDB.bed')
     bed = bed.sort()
-    merged = bed.merge(s=True, c=[4, 5], o='distinct', d=mddb)
+    #merged = bed.merge(s=True, c=[4, 5], o='distinct', d=mddb) # Worked with bedtools 2.26 but failed with 2.29
+    merged = bed.merge(s=True, c=[4, 5, 6], o='distinct', d=mddb) # For bedtools 2.29
     merged.saveas(outDir + fkey + '.APSitesDB.bed')
-    df = pd.read_csv(outDir + fkey + '.APSitesDB.bed', sep='\t', index_col=None, header=None, names=['chr', 'start', 'end', 'strand', 'gene', 'PAtype'])
+    #df = pd.read_csv(outDir + fkey + '.APSitesDB.bed', sep='\t', index_col=None, header=None, names=['chr', 'start', 'end', 'strand', 'gene', 'PAtype']) # Worked with bedtools 2.26 but failed with 2.29
+    df = pd.read_csv(outDir + fkey + '.APSitesDB.bed', sep='\t', index_col=None, header=None, names=['chr', 'start', 'end', 'gene', 'PAtype', 'strand']) # For bedtools 2.29
     df = df[['chr', 'start', 'end', 'gene', 'PAtype', 'strand']]
     df = df[~df['chr'].str.contains('_')]
     df = df[~df['gene'].str.contains(',')]
@@ -132,7 +135,8 @@ def ExtNovelAPA(outDir, fkey, ref_polyA, ref_bed, ref_fasta, APAblock, mddb, md,
     pooled = BedTool(outDir + fkey + '_Jumbo.bed')
     pooled = pooled.sort()
     pooled.saveas(outDir + fkey + '_Jumbo.bed')
-    merged_bg = pooled.merge(s=True, d=md)
+    #merged_bg = pooled.merge(s=True, d=md) # Worked with bedtools 2.26 but failed with 2.29
+    merged_bg = pooled.merge(s=True,c=[6], o='distinct') # For bedtools 2.29
     merged_bg.saveas(outDir + fkey + '_merged.features.bed')
     df = pd.read_csv(outDir + fkey + '_merged.features.bed', sep='\t', header=None, names=['Chr', 'Start', 'End', 'Strand'], index_col=None)
     nrow = df.shape[0]
@@ -147,7 +151,7 @@ def ExtNovelAPA(outDir, fkey, ref_polyA, ref_bed, ref_fasta, APAblock, mddb, md,
     localdate = time.strftime('%a %m/%d/%Y')
     localtime = time.strftime('%H:%M:%S')
     logfile.write('# Finifhed generating features bed file on ' + localdate + ' at: ' + localtime + ' ##\n')
-    
+
     # add geen names #
     df = add_gene_name(outDir + fkey + '_denovoAPAsites.bed', ref_bed)
     df = df[df.Distance >= -16000]
