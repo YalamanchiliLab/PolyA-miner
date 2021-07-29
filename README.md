@@ -28,10 +28,10 @@ PolyA-miner.py: the following arguments are required: -d, -o, -pa, -index, -fast
   -p P                No. of processors to use
   -expNovel           Explore novel APA sites
   -ip IP              Internal priming window
-  -pa_p PA_P          pOverA filter: P
-  -pa_a PA_A          pOverA filter: A
-  -pa_m PA_M          pOverA filter: M
-  -apa_min APA_MIN    Min. proportion per APA
+  -pa_p PA_P          pOverA filter P: min. proportion of the samples satisfying the following -pa_a and -pa_m filters
+  -pa_a PA_A          pOverA filter A: min. per-site read coverage in atleast -pa_p proportion of the samples
+  -pa_m PA_M          pOverA filter M: min. per-site read coverage in any of the samples
+  -apa_min APA_MIN    Min. proportion of an APA site
   -gene_min GENE_MIN  Min counts per Gene
   -mdapa MDAPA        Cluster distance for annotated polyA sites
   -md MD              Cluster distance for de-novo polyA sites
@@ -44,6 +44,7 @@ PolyA-miner.py: the following arguments are required: -d, -o, -pa, -index, -fast
 1) Data Processing: fastp, bowtie2, samtools, featureCounts/Subread    
 2) Python libraries: pandas, cython, pybedtools, scipy, sklearn, statsmodels    
 
-PolyA-miner will check for key requied packages and install them. If any of the installations fail, try installing python3.X-dev library ```sudo apt-get install python3.X-dev```  
+## Test environment: fastp v0.20.0, bowtie2 v2.3.4.1, samtools v1.7, featureCounts v2.0.0, bedtools v2.29
 
-Test environment: fastp v0.20.0, bowtie2 v2.3.4.1, samtools v1.7, featureCounts v1.6.0
+PolyA-miner will check for key requied packages and install them. 
+If any of the installations fail, try installing python3.X-dev library ```sudo apt-get install python3.X-dev```
