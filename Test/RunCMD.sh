@@ -1,0 +1,1 @@
+python3 PolyA-miner/PolyA-miner.py -d TestData/ -o Test_Results -pa <pathto polyA bed file> -index <path to bowtie2 index> -fasta <path to genome fasta file> -bed <path to gene bed file> -i 50 -p 8 -ip 30 -key Test_PolyA_A -c1 C1.fastq.gz,C2.fastq.gz,C3.fastq.gz -c2 T1.fastq.gz,T2.fastq.gz,T3.fastq.gz
