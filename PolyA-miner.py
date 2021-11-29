@@ -316,7 +316,7 @@ def main():
 	log=subprocess.run(['rm','-R']+files,stderr=subprocess.DEVNULL,shell=False)
 	try:
 		subprocess.run(['rm',dummy_refPA]+files,stderr=subprocess.DEVNULL,shell=False)
-	except:
+	except: 
 		pass
 		
 if __name__ == "__main__":
