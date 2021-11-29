@@ -54,7 +54,7 @@ def main():
 	optional.add_argument('-gene_min',help='Min counts per Gene',type=int, default=10)
 	optional.add_argument('-apa_min',help='Min. proportion per APA',type=float, default=0.05)
 	#
-	optional.add_argument('-t',help='Statistical Test- BB: for beta-binomail or iNMF: for iterative NMF ',type=str,default="DM")
+	optional.add_argument('-t',help='Statistical Test- BB: for beta-binomail or iNMF: for iterative NMF. For small sample size BB is recommended ',choices=['BB','iNMF'],type=str,default="BB")
 	optional.add_argument('-i',help='No. of NMF iterations. Valid only for -t iNMF',type=int,default=100)
 	optional.add_argument('-outPrefix',help='Output file/s prefix', default="PolyAminer_Out",type=str)
 	if len(sys.argv)==1:
