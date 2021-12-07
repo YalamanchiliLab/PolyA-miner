@@ -54,7 +54,7 @@ def main():
 	optional.add_argument('-gene_min',help='Min counts per Gene',type=int, default=10)
 	optional.add_argument('-apa_min',help='Min. proportion per APA',type=float, default=0.05)
 	#
-	optional.add_argument('-t',help='Statistical Test- BB: for beta-binomail or iNMF: for iterative NMF. For small sample size BB is recommended ',choices=['BB','iNMF'],type=str,default="BB")
+	optional.add_argument('-t',help='Statistical Test- BB: for beta-binomial or iNMF: for iterative NMF. For small sample size BB is recommended ',choices=['BB','iNMF'],type=str,default="BB")
 	optional.add_argument('-i',help='No. of NMF iterations. Valid only for -t iNMF',type=int,default=100)
 	optional.add_argument('-outPrefix',help='Output file/s prefix', default="PolyAminer_Out",type=str)
 	if len(sys.argv)==1:
@@ -66,8 +66,11 @@ def main():
 	if args.mode =='bam' and args.umi >1:
 		print("\nUMI option is only valid in fastq mode ...\n")
 		exit()
-	if args.mode =='bam' and len(args.index) >= 1:
-		print("\nindex option is only valid in fastq mode. Skipping ...\n")
+	try:
+		if args.mode =='bam' and len(args.index) >= 1:
+			print("\nindex option is only valid in fastq mode. Skipping ...\n")
+	except:
+		pass
 
 	# Check Outdir #
 	args.o=args.o.rstrip("/")
@@ -226,13 +229,13 @@ def main():
 	if MakeAPAMatrix.MakeMatrix(args.o, args.p, args.outPrefix, args.pa_p, args.pa_a, args.pa_m, controls, treated, args.apa_min, args.gene_min, args.mode,controls+treated,logfile) == 1:
 		localdate = time.strftime('%a %m/%d/%Y')
 		localtime = time.strftime('%H:%M:%S')
-		logfile.write('# Completed adstracting APA proportions : '+localdate+' at: ' + localtime+' \n')
+		logfile.write('# Completed abstracting APA proportions : '+localdate+' at: ' + localtime+' \n')
 		pass
 	else:
 		localdate = time.strftime('%a %m/%d/%Y')
 		localtime = time.strftime('%H:%M:%S')
-		logfile.write("\nError in adstracting APA proportions ...\n")
-		print ("\nError in adstracting APA proportions ...\n")
+		logfile.write("\nError in abstracting APA proportions ...\n")
+		print ("\nError in abstracting APA proportions ...\n")
 		exit()
 
 	###################################
@@ -260,12 +263,12 @@ def main():
 		if STest.runBBtest(args.o.rstrip("/")+"/"+args.outPrefix+ '_APA.CountMatrix.GFil.PA.PR.txt', nc, nt, args.o, args.outPrefix, args.p,logfile):
 			localdate = time.strftime('%a %m/%d/%Y')
 			localtime = time.strftime('%H:%M:%S')
-			logfile.write('# Completed beta-binomail testing: ' + localdate + ' at: ' + localtime + ' \n')
+			logfile.write('# Completed beta-binomial testing: ' + localdate + ' at: ' + localtime + ' \n')
 		else:
 			localdate = time.strftime('%a %m/%d/%Y')
 			localtime = time.strftime('%H:%M:%S')
-			logfile.write("\nError in beta-binomail testing ...\n")
-			print ("\nError in beta-binomail testing ...\n")
+			logfile.write("\nError in beta-binomial testing ...\n")
+			print ("\nError in beta-binomial testing ...\n")
 			exit()
 
 	if args.t =='iNMF':

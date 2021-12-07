@@ -163,7 +163,7 @@ def ExtNovelAPA(outDir, fkey, ref_bed, ref_fasta, md, anchor, iplen, prpA, npc, 
 
 	localdate = time.strftime('%a %m/%d/%Y')
 	localtime = time.strftime('%H:%M:%S')
-	logfile.write('# Finifhed generating features bed file on ' + localdate + ' at: ' + localtime + ' ##\n')
+	logfile.write('# Finished generating features bed file on ' + localdate + ' at: ' + localtime + ' ##\n')
 
 	# add geen names #
 	df = add_gene_name(outDir + fkey + '_denovoAPAsites.bed', ref_bed)

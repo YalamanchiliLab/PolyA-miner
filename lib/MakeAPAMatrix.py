@@ -152,7 +152,7 @@ def MakeMatrix(outDir, npc, fkey, PA_P, PA_A, M, controls, treated, mip, mge, mo
 	fdf.to_csv(outDir + fkey + '_APA.CountMatrix.PR.txt', sep='\t', index=False)
 	localdate = time.strftime('%a %m/%d/%Y')
 	localtime = time.strftime('%H:%M:%S')
-	logfile.write('# Finished filterin low prop APA sites : ' + localdate + ' at: ' + localtime + ' \n')
+	logfile.write('# Finished filtering low prop APA sites : ' + localdate + ' at: ' + localtime + ' \n')
 
 	# PoverA filter.#
 	cdf = fdf[['feature_id', 'gene_id'] + controls]
