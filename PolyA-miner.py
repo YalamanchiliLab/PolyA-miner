@@ -297,9 +297,13 @@ def main():
 		pdata=pd.merge(pdata,genes,on=["Gene"],how="left")
 		pdata=pdata.drop(columns=["Chr","Start","End","Strand"])
 	else:
-		genes[['Gene','Version']] = genes['Gene'].str.split('.',expand=True)
-		pdata=pd.merge(pdata,genes,on=["Gene"],how="left")
-		pdata=pdata.drop(columns=["Chr","Start","End","Strand","Version"])
+		try:
+			genes[['Gene','Version']] = genes['Gene'].str.split('.',expand=True)
+			pdata=pd.merge(pdata,genes,on=["Gene"],how="left")
+			pdata=pdata.drop(columns=["Chr","Start","End","Strand","Version"])
+		except:
+			pdata=pd.merge(pdata,genes,on=["Gene"],how="left")
+			pdata=pdata.drop(columns=["Chr","Start","End","Strand"])
 	pdata.to_csv(args.o.rstrip("/")+"/"+args.outPrefix+'_PolyA-miner.Results.txt',sep="\t",header=True,index=False)
 	
 
