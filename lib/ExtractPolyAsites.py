@@ -202,9 +202,15 @@ def ExtNovelAPA(outDir, fkey, ref_bed, ref_fasta, md, anchor, iplen, prpA, npc, 
 	for line in lines:
 		data = line.strip().split('\t')
 		if data[5] == '+' and data[0] != 'chrM':
-			fw.write(data[0] + '\t' + str(int(data[2]) - 10) + '\t' + str(int(data[2]) + iplen) + '\t' + data[0] + '_' + data[1] + '_' + data[2] + '_' + data[3].replace('_', '-') + '_' + data[4].replace('_', '-') + '_' + data[5] + '\tN\t' + data[5] + '\n')
+			if ((int(data[2]) - 10) > 0):
+				fw.write(data[0] + '\t' + str(int(data[2]) - 10) + '\t' + str(int(data[2]) + iplen) + '\t' + data[0] + '_' + data[1] + '_' + data[2] + '_' + data[3].replace('_', '-') + '_' + data[4].replace('_', '-') + '_' + data[5] + '\tN\t' + data[5] + '\n')
+			else:
+				fw.write(data[0] + '\t' + str(int(data[2])) + '\t' + str(int(data[2]) + iplen) + '\t' + data[0] + '_' + data[1] + '_' + data[2] + '_' + data[3].replace('_', '-') + '_' + data[4].replace('_', '-') + '_' + data[5] + '\tN\t' + data[5] + '\n')
 		if data[5] == '-' and data[0] != 'chrM':
-			fw.write(data[0] + '\t' + str(int(data[1]) - iplen) + '\t' + str(int(data[1]) + 10) + '\t' + data[0] + '_' + data[1] + '_' + data[2] + '_' + data[3].replace('_', '-') + '_' + data[4].replace('_', '-') + '_' + data[5] + '\tN\t' + data[5] + '\n')
+			if ((int(data[1]) - iplen) > 0):
+				fw.write(data[0] + '\t' + str(int(data[1]) - iplen) + '\t' + str(int(data[1]) + 10) + '\t' + data[0] + '_' + data[1] + '_' + data[2] + '_' + data[3].replace('_', '-') + '_' + data[4].replace('_', '-') + '_' + data[5] + '\tN\t' + data[5] + '\n')
+			else:
+				fw.write(data[0] + '\t' + str(int(data[1])) + '\t' + str(int(data[1]) + 10) + '\t' + data[0] + '_' + data[1] + '_' + data[2] + '_' + data[3].replace('_', '-') + '_' + data[4].replace('_', '-') + '_' + data[5] + '\tN\t' + data[5] + '\n')
 
 	fw.close()
 	os.system('bedtools getfasta -fo ' + outDir + fkey + '_novelAPA.bed'.replace('.bed', '.seq.fasta') + ' -name -s -fi ' + ref_fasta + ' -bed ' + outDir + fkey + '_novelAPA.bed'.replace('.bed', '.seq.bed'))
