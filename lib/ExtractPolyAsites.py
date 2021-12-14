@@ -105,7 +105,7 @@ def computeA(string, size,prpA):
 			return (0)
 	return (1)
 
-def ExtNovelAPA(outDir, fkey, ref_bed, ref_fasta, md, anchor, iplen, prpA, npc, mode, samples,logfile):	
+def ExtNovelAPA(outDir, fkey, ref_bed, ref_fasta, md, anchor, iplen, novelD, prpA, npc, mode, samples,logfile):	
 	# Make bged grapg files #
 	if mode =="fastq":
 		files = glob.glob(outDir + '*.bam')
@@ -167,7 +167,8 @@ def ExtNovelAPA(outDir, fkey, ref_bed, ref_fasta, md, anchor, iplen, prpA, npc, 
 
 	# add geen names #
 	df = add_gene_name(outDir + fkey + '_denovoAPAsites.bed', ref_bed)
-	df = df[df.Distance >= -16000]
+	#df = df[df.Distance >= -16000]
+	df = df[df.Distance >= (novelD*-1)]
 	df.to_csv(outDir + fkey + '_denovoAPAsites.bed', sep='\t', index=False, header=None)
 	
 	localdate = time.strftime('%a %m/%d/%Y')
