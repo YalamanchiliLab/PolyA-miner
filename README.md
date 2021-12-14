@@ -8,20 +8,13 @@ python3 PolyA-miner.py <options>
 
 ## Arguments  
   ```
-
-  Required arguments:
-  -mode {bam,fastq}     Run mode : 'bam' to start from mapped data,
-                        'fastq' to start from raw data (default: bam)
-  -c1 C1 [C1 ...]       Comma-separated list of condition1 files. Full path
-                        for BAMs (index files are also expected) or Just file
-                        names for fastq (default: None)
-  -c2 C2 [C2 ...]       Comma-separated list of condition2 files. Full path
-                        for BAMs (index files are also expected) or Just file
-                        names for fastq (default: None)
+ Required arguments:
+  -mode {bam,fastq}     Run mode options: 'bam' to start from mapped data, 'fastq' to start from raw data (default: bam)
+  -c1 C1 [C1 ...]       Comma-separated list of condition1 files. Full path for BAMs (index files are also expected) or Just file names for fastq (default: None)
+  -c2 C2 [C2 ...]       Comma-separated list of condition2 files. Full path for BAMs (index files are also expected) or Just file names for fastq (default: None)
   -fasta FASTA          Reference fasta sequence (default: None)
   -bed BED              Reference genes bed file (default: None)
-  -pa PA                PolyA annotations file standard 6 column bed format
-                        (default: None)
+  -pa PA                PolyA annotations file standard 6 column bed format (default: None)
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -35,15 +28,16 @@ optional arguments:
   -md MD                Cluster distance for de-novo polyA sites: Merge polyA sites with in this distance (default: 0)
   -anchor ANCHOR        Overlap in "bp" for mapping de-novo polyA sites to annotated polyA sites (default: 1)
   -expNovel {1,0}       Explore novel APA sites 0: only annotated sites 1: de-novo (default: 0)
+  -novel_d NOVEL_D      Distance from annotated TES to map novel pA sites (default: 1000)
   -p P                  No. of processors to use (default: 4)
   -ip IP                Internal priming window (default: 50)
-  -a A                  Internal priming polyA fraction (default: 0.6)
+  -a A                  Internal priming polyA fraction (default: 0.65)
   -pa_p PA_P            pOverA filter: P (default: 0.6)
   -pa_a PA_A            pOverA filter: A (default: 5)
   -pa_m PA_M            pOverA filter: M (default: 2)
   -gene_min GENE_MIN    Min counts per Gene (default: 10)
   -apa_min APA_MIN      Min. proportion per APA (default: 0.05)
-  -t {BB,iNMF}          Statistical Test- BB: for beta-binomail or iNMF: for iterative NMF. For small sample size BB is recommended (default: BB)
+  -t {BB,iNMF}          Statistical Test- BB: for beta-binomial or iNMF: for iterative NMF. For small sample size BB is recommended (default: BB)
   -i I                  No. of NMF iterations. Valid only for -t iNMF (default: 100)
   -outPrefix OUTPREFIX  Output file/s prefix (default: PolyAminer_Out)
   ```
