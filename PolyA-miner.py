@@ -43,8 +43,10 @@ def main():
 	optional.add_argument('-mdapa',help='Cluster distance for annotated polyA sites: Merge polyA sites with in this distance. ',type=int, default=0)
 	optional.add_argument('-md',help='Cluster distance for de-novo polyA sites: Merge polyA sites with in this distance',type=int, default=0)
 	optional.add_argument('-anchor',help='Overlap in "bp" for mapping de-novo polyA sites to annotated polyA sites ',type=int, default=1)
+	
 	# Tuning #
 	optional.add_argument('-expNovel',help='Explore novel APA sites 0: only annotated sites 1: de-novo',choices=[1,0],type=int,default=0)
+	optional.add_argument('-novel_d',help='Distance from annotated TES to map novel pA sites',type=int, default=1000)
 	optional.add_argument('-p',help='No. of processors to use',type=int,default=4)
 	optional.add_argument('-ip',help='Internal priming window',type=int, default=50)
 	optional.add_argument('-a',help='Internal priming polyA fraction',type=float, default=0.65)
@@ -209,7 +211,7 @@ def main():
 		print ("\nError in extracting annotated polyadenylation sites ...\n")
 		exit()
 	if args.expNovel == 1:
-		if ExtractPolyAsites.ExtNovelAPA(args.o, args.outPrefix, args.bed, args.fasta, args.md, args.anchor, args.ip, args.a, args.p, args.mode,controls+treated,logfile):
+		if ExtractPolyAsites.ExtNovelAPA(args.o, args.outPrefix, args.bed, args.fasta, args.md, args.anchor, args.ip, args.novel_d, args.a, args.p, args.mode,controls+treated,logfile):
 			localdate = time.strftime('%a %m/%d/%Y')
 			localtime = time.strftime('%H:%M:%S')
 			logfile.write('# Completed extracting de-novo polyadenylation sites : '+localdate+' at: ' + localtime+' \n')
