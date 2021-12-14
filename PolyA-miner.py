@@ -47,7 +47,7 @@ def main():
 	optional.add_argument('-expNovel',help='Explore novel APA sites 0: only annotated sites 1: de-novo',choices=[1,0],type=int,default=0)
 	optional.add_argument('-p',help='No. of processors to use',type=int,default=4)
 	optional.add_argument('-ip',help='Internal priming window',type=int, default=50)
-	optional.add_argument('-a',help='Internal priming polyA fraction',type=float, default=0.6)
+	optional.add_argument('-a',help='Internal priming polyA fraction',type=float, default=0.65)
 	optional.add_argument('-pa_p',help='pOverA filter: P ',type=float, default=0.6)
 	optional.add_argument('-pa_a',help='pOverA filter: A ',type=int, default=5)
 	optional.add_argument('-pa_m',help='pOverA filter: M ',type=int, default=2)
