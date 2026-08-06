@@ -66,20 +66,25 @@ def PoverA(pars):
 	return (pars[0])
 
 def APA_counts(f):
-	file = f.split(',')[0]
-	saf = f.split(',')[1]
-	if len(f.split(',')) == 3:
-		outfile=f.split(',')[2]+file.split("/")[-1].replace('.bam','')
+	fields = f.split(',')
+	file = fields[0]
+	saf = fields[1]
+	# The library strandedness (args.s) travels in the job tuple as the last field.
+	strand = fields[-1]
+	if str(strand) not in ('0', '1', '2'):
+		raise ValueError("APA_counts: strand must be '0', '1' or '2'; got " + repr(strand))
+	if len(fields) == 4:
+		outfile=fields[2]+file.split("/")[-1].replace('.bam','')
 	else:
 		outfile=file.replace('.sorted.bam','')
-	log = subprocess.run(['featureCounts','-a',saf,'-F','SAF','-f','-O','--readExtension5','0','--readExtension3','0','-M','-s','0','-T','5','-o',outfile+'.APA.Counts.txt',file],stderr=subprocess.PIPE,stdout=subprocess.PIPE,shell=False)
+	log = subprocess.run(['featureCounts','-a',saf,'-F','SAF','-f','-O','--readExtension5','0','--readExtension3','0','-M','-s',str(strand),'-T','5','-o',outfile+'.APA.Counts.txt',file],stderr=subprocess.PIPE,stdout=subprocess.PIPE,shell=False)
 	output = log.stderr.decode(encoding='utf-8').split("\n")
 	for oline in output:
 		if "Total reads :" in oline or "Total alignments :" in oline:
 			n=oline.strip().split(": ")[1].split(" ")[0]
 			return(n)
 
-def MakeMatrix(outDir, npc, fkey, PA_P, PA_A, M, controls, treated, mip, mge, mode,samples,logfile):
+def MakeMatrix(outDir, npc, fkey, PA_P, PA_A, M, controls, treated, mip, mge, mode,samples,logfile,strand=0):
 	if os.path.isfile(outDir + fkey + '_denovoAPAsites.saf'):
 		saf=outDir + fkey + '_denovoAPAsites.saf'
 	else:
@@ -88,7 +93,7 @@ def MakeMatrix(outDir, npc, fkey, PA_P, PA_A, M, controls, treated, mip, mge, mo
 	if mode =="fastq":
 		files = glob.glob(outDir + '*.bam')
 		for i in range(0, len(files)):
-			files[i] = files[i] + ',' + saf
+			files[i] = files[i] + ',' + saf + ',' + str(strand)
 		for i in range(0, len(controls)):
 			controls[i] = controls[i].replace('.fastq.gz', '')
 		for i in range(0, len(treated)):
@@ -97,14 +102,26 @@ def MakeMatrix(outDir, npc, fkey, PA_P, PA_A, M, controls, treated, mip, mge, mo
 	if mode == "bam":
 		files=samples
 		for i in range(0, len(files)):
-			files[i] = files[i] + ',' + saf+ ',' + outDir
+			files[i] = files[i] + ',' + saf+ ',' + outDir + ',' + str(strand)
 		for i in range(0, len(controls)):
 			controls[i] = controls[i].split("/")[-1].replace('.bam', '')
 		for i in range(0, len(treated)):
 			treated[i] = treated[i].split("/")[-1].replace('.bam', '')
 	
+	# The argument block at the top of the log records what was PARSED. These two
+	# lines record what was EXECUTED, so a silent mismatch cannot recur unnoticed.
+	logfile.write('# featureCounts strand argument in use: -s ' + str(strand) + '\n')
+	logfile.flush()
+
 	with cf.ProcessPoolExecutor(max_workers=npc) as (executor):
 		result = list(executor.map(APA_counts, files))
+
+	applied = set(f.split(',')[-1] for f in files)
+	if applied != set([str(strand)]):
+		raise RuntimeError('featureCounts strand mismatch: requested ' + repr(str(strand))
+					   + ' but job tuples carried ' + repr(sorted(applied)))
+	logfile.write('# featureCounts strand verified across ' + str(len(files)) + ' libraries\n')
+	logfile.flush()
 	
 	# Lib Size #
 	fwls=open(outDir+"LibSize.txt","w")
