@@ -228,7 +228,7 @@ def main():
 	###################################
 	# Module 3: Make APA count matrix #
 	###################################
-	if MakeAPAMatrix.MakeMatrix(args.o, args.p, args.outPrefix, args.pa_p, args.pa_a, args.pa_m, controls, treated, args.apa_min, args.gene_min, args.mode,controls+treated,logfile) == 1:
+	if MakeAPAMatrix.MakeMatrix(args.o, args.p, args.outPrefix, args.pa_p, args.pa_a, args.pa_m, controls, treated, args.apa_min, args.gene_min, args.mode,controls+treated,logfile,args.s) == 1:
 		localdate = time.strftime('%a %m/%d/%Y')
 		localtime = time.strftime('%H:%M:%S')
 		logfile.write('# Completed abstracting APA proportions : '+localdate+' at: ' + localtime+' \n')
