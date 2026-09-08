@@ -81,6 +81,9 @@ def ComputeVectorPro(x):
 			 
 def VectorPro(outDir, fkey, nc, nt, npc, matrix, LS):
 	df = pd.read_csv(matrix, sep='\t', index_col=None)
+	df[['feature_id','FM']]=df.feature_id.str.split('@', expand=True)
+	df= df.drop(columns=['FM'])
+	
 	genes = list(set(list(df['gene_id'])))
 	dflb = pd.read_csv(LS, sep='\t', index_col=None)
 	cols = df.columns[2:]

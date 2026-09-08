@@ -10,6 +10,7 @@ from sklearn import preprocessing
 from numpy import array, dot, arccos, clip
 from numpy.linalg import norm
 from scipy.stats import combine_pvalues
+import traceback
 
 
 def geneLevelBB(gdf):
@@ -17,10 +18,13 @@ def geneLevelBB(gdf):
 	PolASites_No=str(len(gdf['feature_id']))
 	PolyASites=",".join(list(gdf['feature_id']))
 	DeltaU= ",".join(list(map(str,list(gdf['DeltaU']))))
+	gdf['DeltaU'] = gdf['DeltaU'].astype(float)
+
 	if gdf['DeltaU'].max() >= abs(gdf['DeltaU'].min()):
-		i=gdf['DeltaU'].argmax()
+		i = gdf['DeltaU'].argmax()
 	else:
-		i=gdf['DeltaU'].argmin()
+		i = gdf['DeltaU'].argmin()
+
 	maxPolyA=gdf['feature_id'].iloc[i]
 	maxDeltaU=gdf['DeltaU'].iloc[i]
 	Stat,Gpval= combine_pvalues(list(gdf["P-value"]), "stouffer", weights = np.absolute(list(gdf["DeltaU"])))
@@ -35,6 +39,9 @@ def runBBtest(apa_matrix, nc, nt, out, key, npc,logfile):
 		ro.r['options'](warn=-1)
 		countdata=importr('countdata')
 		apa_df=pd.read_csv(apa_matrix,sep="\t",header=0,index_col=None)
+		#apa_df[['feature_id','FM']]=apa_df.feature_id.str.split('@', expand=True)
+		#apa_df= apa_df.drop(columns=['FM'])
+
 		temp = apa_df.drop(columns = ["feature_id"]).groupby(["gene_id"]).sum().add_suffix("_G")
 		apa_df = apa_df.merge(temp, on="gene_id", how = "inner")
 		cols=apa_df.columns
@@ -71,7 +78,12 @@ def runBBtest(apa_matrix, nc, nt, out, key, npc,logfile):
 		localdate = time.strftime('%a %m/%d/%Y')
 		localtime = time.strftime('%H:%M:%S')
 		logfile.write('# Finished BB test on APAsites: ' + localdate + ' at: ' + localtime + ' \n')
-		apa_df['P-value']=results[results.names.index('p.value')][:].tolist()
+		
+
+		#apa_df['P-value']=results[results.names.index('p.value')][:].tolist()
+		index = int(np.where(results.names == 'p.value')[0][0])
+		result_item = results[index]
+		apa_df['P-value'] = result_item.tolist() if hasattr(result_item, "tolist") else list(result_item)
 		apa_df["P-value"] = pd.to_numeric(apa_df["P-value"])
 		#apa_df = apa_df[apa_df['P-value'].notna()]
 		cN=Ndf[N[:nc]]
@@ -89,8 +101,10 @@ def runBBtest(apa_matrix, nc, nt, out, key, npc,logfile):
 		passlist=[]
 		for gene in list(set(apa_df['gene_id'])):
 			passlist.append(apa_df[apa_df['gene_id'] == gene])
+
 		with cf.ProcessPoolExecutor(max_workers=npc) as (executor):
 			result = list(executor.map(geneLevelBB, passlist))
+
 		localdate = time.strftime('%a %m/%d/%Y')
 		localtime = time.strftime('%H:%M:%S')
 		logfile.write('# Finished Gene level stats: ' + localdate + ' at: ' + localtime + ' \n')
@@ -98,7 +112,10 @@ def runBBtest(apa_matrix, nc, nt, out, key, npc,logfile):
 		gene_df['AdjG-Pval'] = (multi.multipletests(gene_df['G-Pval'], method='fdr_bh', is_sorted=False, returnsorted=False))[1].tolist()		
 		gene_df.to_csv(out.rstrip("/")+"/"+key+'_Gene_Stats.txt',sep="\t",header=True,index=False)
 		return(1)
-	except:
+	except Exception as e:
+		print("Error:", e)
+		print("Type:", type(e))
+		traceback.print_exc()
 		return(0)
 
 
@@ -209,6 +226,9 @@ def iNMFtest(outDir, fkey, nc, nt, ni, npc, matrix,logfile):
 	try:
 		warnings.filterwarnings("ignore")
 		df = pd.read_csv(matrix, sep='\t', index_col=None)
+		#df[['feature_id','FM']]=df.feature_id.str.split('@', expand=True)
+		#df= df.drop(columns=['FM'])
+
 		genes = list(set(list(df['gene_id'])))
 		dflb = pd.read_csv(outDir.rstrip("/")+"/LibSize.txt", sep='\t', index_col=None)
 		cols = df.columns[2:]

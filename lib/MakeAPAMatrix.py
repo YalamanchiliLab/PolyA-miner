@@ -44,6 +44,7 @@ def PropFilter(gene, df, controls, treated, mip):
 		passlist = []
 		for i in range(0, len(ct)):
 			if ct[i] <= mip and tr[i] <= mip:
+				#print(gene," FAIL")
 				continue
 			passlist.append(i)
 		return (tdf.iloc[passlist, :])
@@ -126,12 +127,24 @@ def MakeMatrix(outDir, npc, fkey, PA_P, PA_A, M, controls, treated, mip, mge, mo
 	for s in samples[1:]:
 		dftemp = pd.read_csv(s, comment='#', sep='\t', index_col=None)
 		df[list(dftemp.columns)[-1].split("/")[-1].split('.'+mode)[0]] = dftemp[list(dftemp.columns)[-1]].copy()
-
-	df['feature_id'] = df['Chr'] + '_' + df['Start'].astype(str) + '_' + df['End'].astype(str) + '_' + df['Strand']
-	df[['gene_id', 'isoform']] = df.Geneid.str.split('@', expand=True)	
+	########
+	#Feb 2025 edit for polyA DB run
+	#df[['gene_id', 'feature_id','FM']] = df.Geneid.str.split('@', expand=True)
+	#df['feature_id']=df['feature_id']+"@"+df['FM']
+	split_col=df['Geneid'].str.split('@', expand=True).fillna('')
+	num_columns = split_col.shape[1]
+	if num_columns ==3:
+		df[['gene_id', 'feature_id','FM']] = split_col.copy()
+		df['feature_id']=df['feature_id']+"@"+df['FM']
+	if num_columns ==2:
+		df[['gene_id', 'feature_id']] = split_col.copy()
+		df['feature_id']=df['feature_id']+"@"+"DB"
+	########
 	design = ['feature_id', 'gene_id'] + controls + treated
 	df = df[design]
 	df.to_csv(outDir + fkey + '_APA.CountMatrix.txt', sep='\t', index=False)
+	# For DEGs #
+	df.to_csv(outDir + fkey + '_APACountMatrix4DEGs.txt', sep='\t', index=False)
 	localdate = time.strftime('%a %m/%d/%Y')
 	localtime = time.strftime('%H:%M:%S')
 	logfile.write('# Finished making data matrix : ' + localdate + ' at: ' + localtime + ' \n')
@@ -139,6 +152,7 @@ def MakeMatrix(outDir, npc, fkey, PA_P, PA_A, M, controls, treated, mip, mge, mo
 	# Clean files #
 	log = subprocess.run(["rm"]+samples,stderr=subprocess.DEVNULL,shell=False)
 	
+
 	# Low proportion APA filtering #
 	genes = list(set(list(df['gene_id'])))
 	fdf = pd.DataFrame()
@@ -146,7 +160,7 @@ def MakeMatrix(outDir, npc, fkey, PA_P, PA_A, M, controls, treated, mip, mge, mo
 		t = PropFilter(gene, df, controls, treated, mip)
 		try:
 			if t.shape[0] > 0:
-				fdf = fdf.append(t, ignore_index=True)
+				fdf = pd.concat([fdf, t], ignore_index=True)
 		except:
 			pass
 	fdf.to_csv(outDir + fkey + '_APA.CountMatrix.PR.txt', sep='\t', index=False)
@@ -186,6 +200,7 @@ def MakeMatrix(outDir, npc, fkey, PA_P, PA_A, M, controls, treated, mip, mge, mo
 		result.remove('0')
 	fdf = pd.DataFrame()
 	fdf=df[df['gene_id'].isin(result)] 
+	
 	fdf.to_csv(outDir + fkey + '_APA.CountMatrix.GFil.PA.PR.txt', sep='\t', index=False)
 	localdate = time.strftime('%a %m/%d/%Y')
 	localtime = time.strftime('%H:%M:%S')
