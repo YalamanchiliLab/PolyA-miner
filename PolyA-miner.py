@@ -1,5 +1,5 @@
 # PolyA-miner.py -help # 
-# Hari Krishna Y et al., last update 10/28/2021 #
+# Hari Krishna Y et al., last update 03/01/2022 #
 
 import os, sys
 import time,argparse,subprocess, pandas as pd
@@ -18,7 +18,7 @@ def check_files (checkfiles,logfile):
 	return(1)
 
 def main():
-	parser = argparse.ArgumentParser(description='''PolyA-miner v1.1: Inferring alternative poly-adenylation changes
+	parser = argparse.ArgumentParser(description='''PolyA-miner v1.1.3: Inferring alternative poly-adenylation changes
 	from 3'Seq data  - Yalamanchili H.K. et al. \n''',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 	optional = parser._action_groups.pop()
 	required = parser.add_argument_group('Required arguments')
@@ -34,11 +34,12 @@ def main():
 	# Ref. files
 	optional.add_argument('-index',help='Reference genome bowtie2 index. Valid for -mode fastq',type=str)
 	required.add_argument('-fasta',help='Reference fasta sequence',required='True',type=str)
-	required.add_argument('-bed',help='Reference genes bed file',required='True',type=str)
+	required.add_argument('-gtf',help='Reference gtf file',required='True',type=str)
 	required.add_argument('-pa',help='PolyA annotations file standard 6 column bed format',type=str)
 	
 	# Optional #
 	optional.add_argument('-umi',help='Length of UMIs, 0 if not used', type=int,default=0)
+	optional.add_argument('-ignore',help=' Comma-separated list of regions to igonore from APA analysis UTR5, Introns, CDS, UTR3', nargs='+',type=str,default='ZZZZZZ')
 	optional.add_argument('-apaBlock',help='Window size for annotated polyA sites',type=int, default=30)
 	optional.add_argument('-mdapa',help='Cluster distance for annotated polyA sites: Merge polyA sites with in this distance. ',type=int, default=0)
 	optional.add_argument('-md',help='Cluster distance for de-novo polyA sites: Merge polyA sites with in this distance',type=int, default=0)
@@ -48,7 +49,8 @@ def main():
 	optional.add_argument('-expNovel',help='Explore novel APA sites 0: only annotated sites 1: de-novo',choices=[1,0],type=int,default=0)
 	optional.add_argument('-novel_d',help='Distance from annotated TES to map novel pA sites',type=int, default=1000)
 	optional.add_argument('-p',help='No. of processors to use',type=int,default=4)
-	optional.add_argument('-ip',help='Internal priming window',type=int, default=50)
+	optional.add_argument('-ip_d',help='Downstream internal priming window',type=int, default=50)
+	optional.add_argument('-ip_u',help='Upstream internal priming window',type=int, default=50)
 	optional.add_argument('-a',help='Internal priming polyA fraction',type=float, default=0.65)
 	optional.add_argument('-pa_p',help='pOverA filter: P ',type=float, default=0.6)
 	optional.add_argument('-pa_a',help='pOverA filter: A ',type=int, default=5)
@@ -125,7 +127,8 @@ def main():
 	nc=len(controls)
 	treated="".join(args.c2).replace(" ","").split(",")
 	nt=len(treated)
-
+	args.bed=ExtractPolyAsites.makeGeneBed(args.gtf,args.outPrefix,args.o)
+	
 	if args.mode=='bam':
 		localdate = time.strftime('%a %m/%d/%Y')
 		localtime = time.strftime('%H:%M:%S')
@@ -211,7 +214,7 @@ def main():
 		print ("\nError in extracting annotated polyadenylation sites ...\n")
 		exit()
 	if args.expNovel == 1:
-		if ExtractPolyAsites.ExtNovelAPA(args.o, args.outPrefix, args.bed, args.fasta, args.md, args.anchor, args.ip, args.novel_d, args.a, args.p, args.mode,controls+treated,logfile):
+		if ExtractPolyAsites.ExtNovelAPA(args.o, args.outPrefix, args.bed, args.fasta, args.md, args.anchor, args.ip_d, args.ip_u, args.novel_d, args.a, args.p, args.mode,controls,treated,logfile,args.gtf,args.ignore):
 			localdate = time.strftime('%a %m/%d/%Y')
 			localtime = time.strftime('%H:%M:%S')
 			logfile.write('# Completed extracting de-novo polyadenylation sites : '+localdate+' at: ' + localtime+' \n')
@@ -224,6 +227,7 @@ def main():
 			exit()
 	else:
 		ExtractPolyAsites.makeSAF(args.o, args.outPrefix)
+	
 	
 	###################################
 	# Module 3: Make APA count matrix #
@@ -240,6 +244,8 @@ def main():
 		print ("\nError in abstracting APA proportions ...\n")
 		exit()
 
+
+	#exit() #break for PCA on all samples ... 
 	###################################
 	# Module 4: Gene level PolyA Index 
 	###################################
@@ -255,6 +261,8 @@ def main():
 		print ("\nError in computing PolyA Index ...\n")
 		exit()
 
+
+	
 	###################################
 	# Module 5: Stat BetaBinomial iNMF 
 	###################################
@@ -288,6 +296,7 @@ def main():
 			print ("\nError in iNMF testing ...\n")
 			exit()
 
+	
 	# Merge 4 and 5 add gene symbols #
 	pdata=pd.read_csv(args.o.rstrip("/")+"/"+args.outPrefix+'_PolyA-miner.Results.txt',sep="\t",header=0,index_col=None)
 	stat_data=pd.read_csv(args.o.rstrip("/")+"/"+args.outPrefix+"_Gene_Stats.txt",sep="\t",header=0,index_col=None)
@@ -320,8 +329,9 @@ def main():
 	logfile.write('# Finished PolyA-miner : '+localdate+' at: ' + localtime+' \n')
 	logfile.close()
 
+	
 	# Tidy up  #
-	files=[args.o.rstrip("/")+"/LibSize.txt",args.o.rstrip("/")+"/"+args.outPrefix+"_Gene_Stats.txt",args.o.rstrip("/")+"/"+args.outPrefix+'.APSitesDB.bed',args.o.rstrip("/")+"/"+args.outPrefix+"_APA.CountMatrix.GFil.PA.PR.txt",args.o.rstrip("/")+"/"+args.outPrefix+"_denovoAPAsites.bed"]
+	files=[args.o.rstrip("/")+"/LibSize.txt",args.o.rstrip("/")+"/"+args.outPrefix+"_Gene_Stats.txt",args.o.rstrip("/")+"/"+args.outPrefix+'.APSitesDB.bed',args.o.rstrip("/")+"/"+args.outPrefix+"_APA.CountMatrix.GFil.PA.PR.txt",args.o.rstrip("/")+"/"+args.outPrefix+"_denovoAPAsites.bed",args.o.rstrip("/")+"/"+args.outPrefix+".Genes.bed"]
 	log=subprocess.run(['rm','-R']+files,stderr=subprocess.DEVNULL,shell=False)
 	try:
 		subprocess.run(['rm',dummy_refPA]+files,stderr=subprocess.DEVNULL,shell=False)
